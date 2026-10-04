@@ -91,12 +91,12 @@ export class EventIngestion {
     });
     this.consumer.on(this.consumer.events.DISCONNECT, () => {
       this.kafkaReady = false;
-      if (!this.closing) this.scheduleKafkaReconnect();
+      // KafkaJS also emits this during its own restart and our deliberate retry.
     });
     this.consumer.on(this.consumer.events.CRASH, ({ payload }) => {
       this.kafkaReady = false;
       this.logger.error({ err: payload.error }, "Kafka consumer crashed");
-      if (!this.closing) this.scheduleKafkaReconnect();
+      if (!this.closing && !payload.restart) this.scheduleKafkaReconnect();
     });
   }
 
